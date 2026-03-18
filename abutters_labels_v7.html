@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Abutters Label Generator | Town of Enfield GIS</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.imd.min.js"></script>
+  <script src="https:/cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.imd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+```
+body {
+  font-family: Georgia, 'Times New Roman', serif;
+  background: #f0f2f5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+  color: #374151;
+}
+
+.app-header {
+  width: 100%;
+  max-width: 680px;
+  text-align: center;
+  margin-bottom: 28px;
+}
+.app-header-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+.app-logo {
+  width: 52px;
+  height: 52px;
+  background: #1a3a5c;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+.app-title-block { text-align: left; }
+.app-eyebrow {
+  font-size: 11px;
+  color: #6b7280;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-family: Arial, sans-serif;
+}
+.app-title {
+  font-size: 22px;
+  color: #1a3a5c;
+  font-weight: bold;
+  line-height: 1.2;
+}
+.app-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  font-family: Arial, sans-serif;
+}
+
+.steps {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 680px;
+  margin-bottom: 28px;
+}
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+.step-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #d1d5db;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: bold;
+  font-family: Arial, sans-serif;
+  transition: background 0.3s;
+}
+.step-circle.active { background: #1a3a5c; } .step-label {
+  font-size: 11px;
+  margin-top: 4px;
+  color: #9ca3af;
+  font-family: Arial, sans-serif;
+  transition: color 0.3s;
+}
+.step-label.active { color: #1a3a5c; font-weight: bold; } .step-line {
+  height: 2px;
+  flex: 1;
+  background: #d1d5db;
+  margin-bottom: 20px;
+  transition: background 0.3s;
+}
+.step-line.active { background: #1a3a5c; }
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  width: 100%;
+  max-width: 680px;
+  overflow: hidden;
+}
+.card-body { padding: 40px; }
+
+.section-title { font-size: 20px; color: #1a3a5c; margin-bottom: 6px; } .section-desc { font-size: 14px; color: #6b7280; margin-bottom: 24px; font-family: Arial, sans-serif; }
+
+.dropzone {
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  padding: 48px 24px;
+  text-align: center;
+  cursor: pointer;
+  background: #fafafa;
+  transition: all 0.2s;
+}
+.dropzone:hover, .dropzone.dragging {
+  border-color: #1a3a5c;
+  background: #f0f4f8;
+}
+.dropzone-icon { font-size: 40px; margin-bottom: 12px; } .dropzone-title { font-size: 16px; color: #374151; font-weight: bold; margin-bottom: 6px; font-family: Arial, sans-serif; } .dropzone-hint { font-size: 13px; color: #9ca3af; font-family: Arial, sans-serif; }
+
+.info-box {
+  margin-top: 24px;
+  padding: 16px;
+  background: #f0f4f8;
+  border-radius: 8px;
+  border-left: 4px solid #1a3a5c;
+}
+.info-box-title { font-size: 13px; color: #374151; font-weight: bold; margin-bottom: 8px; font-family: Arial, sans-serif; } .info-box ol { padding-left: 20px; font-size: 13px; color: #6b7280; line-height: 1.9; font-family: Arial, sans-serif; }
+
+.badge-success {
+  display: inline-block;
+  background: #dcfce7;
+  color: #16a34a;
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: bold;
+  font-family: Arial, sans-serif;
+  margin-right: 8px;
+}
+.file-name { font-size: 13px; color: #6b7280; font-family: Arial, sans-serif; }
+
+.form-section {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.form-section-title { font-size: 13px; font-weight: bold; color: #374151; margin-bottom: 16px; font-family: Arial, sans-serif; } .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; } .form-label { font-size: 12px; color: #6b7280; font-family: Arial, sans-serif; } .form-label span { color: #dc2626; } .form-control {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: Arial, sans-serif;
+  background: #fff;
+  color: #374151;
+}
+.form-control:focus { outline: 2px solid #1a3a5c; border-color: transparent; } .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #374151;
+  font-family: Arial, sans-serif;
+}
+.checkbox-label input { width: 16px; height: 16px; cursor: pointer; } .checkbox-muted { color: #9ca3af; }
+
+.csv-files-found {
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+.csv-files-title { font-size: 13px; font-weight: bold; color: #0369a1; margin-bottom: 10px; font-family: Arial, sans-serif; } .csv-file-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-family: Arial, sans-serif;
+  padding: 4px 0;
+  color: #374151;
+}
+.csv-file-item .status-used { color: #16a34a; font-weight: bold; } .csv-file-item .status-ignored { color: #9ca3af; }
+
+.preview-box {
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+.preview-box-title { font-weight: bold; color: #92400e; margin-bottom: 8px; font-size: 13px; font-family: Arial, sans-serif; } .label-preview {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #374151;
+}
+.preview-meta { color: #92400e; margin-top: 8px; font-size: 12px; font-family: Arial, sans-serif; }
+
+.alert-error {
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  color: #dc2626;
+  font-size: 13px;
+  font-family: Arial, sans-serif;
+}
+.alert-warning {
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 6px;
+  color: #92400e;
+  font-size: 13px;
+  font-family: Arial, sans-serif;
+}
+
+.btn-row { display: flex; gap: 12px; }
+.btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  transition: opacity 0.2s;
+}
+.btn:hover { opacity: 0.88; }
+.btn-secondary { border: 1px solid #d1d5db; background: #fff; color: #374151; } .btn-primary {
+  border: none;
+  background: #1a3a5c;
+  color: #fff;
+  font-weight: bold;
+  flex: 1;
+  font-size: 15px;
+  padding: 12px 24px;
+}
+.btn-primary:disabled { background: #9ca3af; cursor: not-allowed; } .btn-outline { border: 1px solid #d1d5db; background: #fff; color: #374151; } .btn-dark { border: none; background: #1a3a5c; color: #fff; font-weight: bold; padding: 10px 24px; }
+
+.done-screen { padding: 40px; text-align: center; } .done-icon { font-size: 64px; margin-bottom: 16px; } .done-title { font-size: 24px; color: #1a3a5c; margin-bottom: 8px; } .done-file { color: #6b7280; font-size: 15px; margin-bottom: 6px; font-family: Arial, sans-serif; } .done-meta { color: #9ca3af; font-size: 13px; margin-bottom: 32px; font-family: Arial, sans-serif; } .print-box {
+  background: #f0f4f8;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 32px;
+  text-align: left;
+  border-left: 4px solid #1a3a5c;
+}
+.print-box-title { font-size: 13px; font-weight: bold; color: #374151; margin-bottom: 8px; font-family: Arial, sans-serif; } .print-box ol { padding-left: 20px; font-size: 13px; color: #6b7280; line-height: 1.9; font-family: Arial, sans-serif; } .done-btn-row { display: flex; gap: 12px; justify-content: center; }
+
+.app-footer { margin-top: 24px; font-size: 12px; color: #9ca3af; text-align: center; font-family: Arial, sans-serif; }
+
+@media (max-width: 520px) {
+  .app-header-inner { flex-direction: column; text-align: center; }
+  .app-title-block { text-align: center; } } ```
+
+  </style>
+</head>
+<body>
+
+  <div class="app-header">
+    <div class="app-header-inner">
+      <div class="app-logo">🏛️</div>
+      <div class="app-title-block">
+        <div class="app-eyebrow">Town of Enfield · GIS Division</div>
+        <div class="app-title">Abutters Label Generator</div>
+      </div>
+    </div>
+    <p class="app-subtitle">
+      Upload your Near Me export ZIP to generate print-ready Avery 5160 mailing labels.
+    </p>
+  </div>
+
+  <div class="steps">
+    <div class="step-item">
+      <div class="step-circle active" id="step-circle-1">1</div>
+      <div class="step-label active" id="step-label-1">Upload ZIP</div>
+    </div>
+    <div class="step-line" id="step-line-1"></div>
+    <div class="step-item">
+      <div class="step-circle" id="step-circle-2">2</div>
+      <div class="step-label" id="step-label-2">Configure</div>
+    </div>
+    <div class="step-line" id="step-line-2"></div>
+    <div class="step-item">
+      <div class="step-circle" id="step-circle-3">3</div>
+      <div class="step-label" id="step-label-3">Generate</div>
+    </div>
+  </div>
+
+  <div class="card">
+
+```
+<!-- STEP 1: UPLOAD -->
+<div id="screen-upload" class="card-body">
+  <h2 class="section-title">Upload Your ZIP Export</h2>
+  <p class="section-desc">
+    Export your Near Me results from Experience Builder and upload the ZIP file here.
+    The app will automatically extract the correct CSV.
+  </p>
+
+  <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+    <div class="dropzone-icon">📦</div>
+    <div class="dropzone-title">Drop your ZIP file here</div>
+    <div class="dropzone-hint">or click to browse · accepts .zip files</div>
+  </div>
+  <input type="file" id="fileInput" accept=".zip" style="display:none" onchange="handleFileInput(this)" />
+
+  <div class="alert-error" id="upload-error" style="display:none;margin-top:16px;"></div>
+
+  <div class="info-box">
+    <div class="info-box-title">How to export from Experience Builder:</div>
+    <ol>
+      <li>Run your Near Me / Abutters search on the map</li>
+      <li>Click the <strong>Export</strong> button in the Near Me widget</li>
+      <li>Save the <strong>ZIP file</strong> to your computer</li>
+      <li>Upload the ZIP here — the correct CSV is extracted automatically</li>
+    </ol>
+  </div>
+</div>
+
+<!-- STEP 2: CONFIGURE -->
+<div id="screen-configure" class="card-body" style="display:none;">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+    <span class="badge-success" id="record-count-badge">0 records loaded</span>
+    <span class="file-name" id="file-name-display"></span>
+  </div>
+
+  <h2 class="section-title">Configure Label Settings</h2>
+  <p class="section-desc" style="margin-bottom:20px;">
+    Review the extracted CSV and customize your label layout.
+  </p>
+
+  <!-- CSV Files Found -->
+  <div class="csv-files-found">
+    <div class="csv-files-title">📂 Files found in ZIP</div>
+    <div id="csv-files-list"></div>
+  </div>
+
+  <!-- Label Options -->
+  <div class="form-section">
+    <div class="form-section-title">Label Options</div>
+    <div class="form-group">
+      <label class="form-label">City / State (printed on every label)</label>
+      <input class="form-control" type="text" id="cityState" value="Enfield, CT" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Page Header Text</label>
+      <input class="form-control" type="text" id="headerText" value="Town of Enfield - Abutters Notification" />
+    </div>
+    <label class="checkbox-label">
+      <input type="checkbox" id="showBorders" />
+      <span>
+        <strong>Show label borders</strong>
+        <span class="checkbox-muted"> — use for alignment test prints</span>
+      </span>
+    </label>
+  </div>
+
+  <!-- Preview -->
+  <div class="preview-box">
+    <div class="preview-box-title">📋 Label Preview</div>
+    <div class="label-preview">
+      <strong id="preview-name">OWNER NAME</strong><br />
+      <span id="preview-address">123 MAIN STREET</span><br />
+      <span id="preview-city">Enfield, CT</span>
+    </div>
+    <div class="preview-meta" id="preview-meta">— labels · — page(s) · Avery 5160 format</div>
+  </div>
+
+  <div class="alert-error" id="configure-error" style="display:none;"></div>
+  <div class="alert-warning" id="configure-warning" style="display:none;"></div>
+
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goToStep('upload')">← Back</button>
+    <button class="btn btn-primary" id="generateBtn" onclick="handleGenerate()">
+      🖨️ Generate Mailing Labels
+    </button>
+  </div>
+</div>
+
+<!-- STEP 3: DONE -->
+<div id="screen-done" class="done-screen" style="display:none;">
+  <div class="done-icon">✅</div>
+  <h2 class="done-title">Labels Generated!</h2>
+  <p class="done-file"><strong>Abutters_Mailing_Labels.pdf</strong> has been downloaded.</p>
+  <p class="done-meta" id="done-meta">— labels · — page(s) · Avery 5160 format</p>
+
+  <div class="print-box">
+    <div class="print-box-title">Printing Instructions:</div>
+    <ol>
+      <li>Open the downloaded PDF file</li>
+      <li>Load <strong>Avery 5160</strong> label sheets into your printer</li>
+      <li>Print at <strong>100% scale</strong> — do not scale to fit page</li>
+      <li>Select <strong>Portrait</strong> orientation</li>
+      <li>Verify alignment with a plain paper test print first</li>
+    </ol>
+  </div>
+
+  <div class="done-btn-row">
+    <button class="btn btn-outline" onclick="goToStep('configure')">← Adjust Settings</button>
+    <button class="btn btn-dark" onclick="resetApp()">Generate New Labels</button>
+  </div>
+</div>
+```
+
+  </div>
+
+  <div class="app-footer">
+    Town of Enfield GIS Division &nbsp;·&nbsp; Avery 5160 &nbsp;·&nbsp; 30 labels per sheet
+  </div>
+
+  <script>
+    // ─────────────────────────────────────────────────────────────────
+    // STATE
+    // ─────────────────────────────────────────────────────────────────
+    let csvRecords   = [];
+    let currentFileName = "";
+    let foundFiles   = [];
+
+    // ─────────────────────────────────────────────────────────────────
+    // TARGET CSV FILENAMES
+    // The app looks for these specific files inside the ZIP
+    // ─────────────────────────────────────────────────────────────────
+    const TARGET_INTERSECTS = "Parcels (contains intersects) (proximity)";
+    const TARGET_WITHIN     = "Parcels (fully within) (proximity)";
+
+    // ─────────────────────────────────────────────────────────────────
+    // FIELD NAMES
+    // ─────────────────────────────────────────────────────────────────
+    const NAME_FIELD    = "SLH_OWN_NAME";
+    const ADDRESS_FIELD = "LOCATION";
+    const ID_FIELD      = "PARCEL_ID";
+
+    // ─────────────────────────────────────────────────────────────────
+    // STEP NAVIGATION
+    // ─────────────────────────────────────────────────────────────────
+    function goToStep(step) {
+      document.getElementById("screen-upload").style.display    = "none";
+      document.getElementById("screen-configure").style.display = "none";
+      document.getElementById("screen-done").style.display      = "none";
+
+      const stepMap = { upload: 1, configure: 2, done: 3 };
+      const current = stepMap[step];
+
+      for (let i = 1; i <= 3; i++) {
+        const circle = document.getElementById(`step-circle-${i}`);
+        const label  = document.getElementById(`step-label-${i}`);
+        if (i <= current) { circle.classList.add("active"); label.classList.add("active"); }
+        else              { circle.classList.remove("active"); label.classList.remove("active"); }
+      }
+      for (let i = 1; i <= 2; i++) {
+        const line = document.getElementById(`step-line-${i}`);
+        if (i < current) { line.classList.add("active"); }
+        else             { line.classList.remove("active"); }
+      }
+
+      document.getElementById(`screen-${step}`).style.display = "block";
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // CSV PARSING
+    // ─────────────────────────────────────────────────────────────────
+    function parseCSV(text) {
+      const lines = text.trim().split(/\r?\n/);
+      if (lines.length < 2) return [];
+      const headers = splitCSVLine(lines[0]);
+      return lines.slice(1).map(line => {
+        const values = splitCSVLine(line);
+        const obj = {};
+        headers.forEach((h, i) => { obj[h] = (values[i] || "").trim(); });
+        return obj;
+      }).filter(r => Object.values(r).some(v => v));
+    }
+
+    function splitCSVLine(line) {
+      const result = [];
+      let current  = "";
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"')             { inQuotes = !inQuotes; }
+        else if (ch === "," && !inQuotes) { result.push(current.trim()); current = ""; }
+        else                        { current += ch; }
+      }
+      result.push(current.trim());
+      return result;
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // FILE HANDLING
+    // ─────────────────────────────────────────────────────────────────
+    function handleFileInput(input) {
+      if (input.files && input.files[0]) processFile(input.files[0]);
+    }
+
+    async function processFile(file) {
+      const errEl = document.getElementById("upload-error");
+      errEl.style.display = "none";
+
+      if (!file.name.toLowerCase().endsWith(".zip")) {
+        errEl.textContent = "⚠️ Please upload a ZIP file exported from the Near Me widget.";
+        errEl.style.display = "block";
+        return;
+      }
+
+      currentFileName = file.name;
+
+      try {
+        // Load JSZip
+        if (!window.JSZip) {
+          errEl.textContent = "⚠️ ZIP library not loaded. Please check your internet connection and refresh.";
+          errEl.style.display = "block";
+          return;
+        }
+
+        const zip        = await JSZip.loadAsync(file);
+        const allFiles   = Object.keys(zip.files);
+        foundFiles       = allFiles.filter(f => f.toLowerCase().endsWith(".csv"));
+
+        if (!foundFiles.length) {
+          errEl.textContent = "⚠️ No CSV files found inside the ZIP.";
+          errEl.style.display = "block";
+          return;
+        }
+
+        // Find the target CSV files
+        const intersectsFile = foundFiles.find(f =>
+          f.includes(TARGET_INTERSECTS)
+        );
+        const withinFile = foundFiles.find(f =>
+          f.includes(TARGET_WITHIN)
+        );
+
+        // Determine which file to use
+        // Priority: intersects first then within then first available
+        const targetFile = intersectsFile || withinFile || foundFiles[0];
+
+        if (!targetFile) {
+          errEl.textContent = "⚠️ Could not find the expected CSV file in the ZIP.";
+          errEl.style.display = "block";
+          return;
+        }
+
+        // Extract and parse the target CSV
+        const csvText = await zip.files[targetFile].async("string");
+        const records = parseCSV(csvText);
+
+        if (!records.length) {
+          errEl.textContent = "⚠️ No records found in the CSV file.";
+          errEl.style.display = "block";
+          return;
+        }
+
+        csvRecords = records;
+        setupConfigureScreen(foundFiles, targetFile);
+        goToStep("configure");
+
+      } catch(err) {
+        errEl.textContent = `⚠️ Error reading ZIP file: ${err.message}`;
+        errEl.style.display = "block";
+      }
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // DRAG AND DROP
+    // ─────────────────────────────────────────────────────────────────
+    const dropzone = document.getElementById("dropzone");
+
+    dropzone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropzone.classList.add("dragging");
+    });
+    dropzone.addEventListener("dragleave", () => {
+      dropzone.classList.remove("dragging");
+    });
+    dropzone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropzone.classList.remove("dragging");
+      if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
+    });
+
+    // ─────────────────────────────────────────────────────────────────
+    // CONFIGURE SCREEN
+    // ─────────────────────────────────────────────────────────────────
+    function setupConfigureScreen(allFiles, usedFile) {
+      document.getElementById("record-count-badge").textContent =
+        `✓ ${csvRecords.length} records loaded`;
+      document.getElementById("file-name-display").textContent = currentFileName;
+
+      // Show which files were found and which is being used
+      const listEl = document.getElementById("csv-files-list");
+      listEl.innerHTML = allFiles.map(f => {
+        const isUsed    = f === usedFile;
+        const shortName = f.split("/").pop();
+        return `
+          <div class="csv-file-item">
+            <span>${isUsed ? "✅" : "⬜"}</span>
+            <span class="${isUsed ? "status-used" : "status-ignored"}">${shortName}</span>
+            ${isUsed ? '<span style="font-size:11px;color:#16a34a;font-family:Arial,sans-serif;">(using this file)</span>' : '<span style="font-size:11px;color:#9ca3af;font-family:Arial,sans-serif;">(ignored)</span>'}
+          </div>
+        `;
+      }).join("");
+
+      // Check for required fields
+      const warnEl  = document.getElementById("configure-warning");
+      const sample  = csvRecords[0] || {};
+      const hasName = NAME_FIELD in sample;
+      const hasAddr = ADDRESS_FIELD in sample;
+
+      if (!hasName || !hasAddr) {
+        warnEl.textContent =
+          `⚠️ Expected fields not found. Looking for "${NAME_FIELD}" and "${ADDRESS_FIELD}". ` +
+          `Found: ${Object.keys(sample).join(", ")}`;
+        warnEl.style.display = "block";
+      } else {
+        warnEl.style.display = "none";
+      }
+
+      updatePreview();
+
+      document.getElementById("cityState").addEventListener("input", updatePreview);
+    }
+
+    function updatePreview() {
+      const cityState = document.getElementById("cityState").value;
+      const sample    = csvRecords[0] || {};
+
+      document.getElementById("preview-name").textContent    = sample[NAME_FIELD]    || "OWNER NAME";
+      document.getElementById("preview-address").textContent = sample[ADDRESS_FIELD] || "123 MAIN STREET";
+      document.getElementById("preview-city").textContent    = cityState || "Enfield, CT";
+
+      const pages = Math.ceil(csvRecords.length / 30);
+      document.getElementById("preview-meta").textContent =
+        `${csvRecords.length} labels · ${pages} page(s) · Avery 5160 format`;
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // GENERATE PDF
+    // ─────────────────────────────────────────────────────────────────
+    function handleGenerate() {
+      const cityState   = document.getElementById("cityState").value;
+      const headerText  = document.getElementById("headerText").value;
+      const showBorders = document.getElementById("showBorders").checked;
+      const errEl       = document.getElementById("configure-error");
+      errEl.style.display = "none";
+
+      if (!window.jspdf) {
+        errEl.textContent = "⚠️ PDF library not loaded. Please check your internet connection and refresh.";
+        errEl.style.display = "block";
+        return;
+      }
+
+      const btn = document.getElementById("generateBtn");
+      btn.textContent = "⏳ Generating PDF...";
+      btn.disabled    = true;
+
+      setTimeout(() => {
+        try {
+          generatePDF({ cityState, headerText, showBorders });
+          const pages = Math.ceil(csvRecords.length / 30);
+          document.getElementById("done-meta").textContent =
+            `${csvRecords.length} labels · ${pages} page(s) · Avery 5160 format`;
+          goToStep("done");
+        } catch(err) {
+          errEl.textContent = `⚠️ Error generating PDF: ${err.message}`;
+          errEl.style.display = "block";
+        }
+        btn.textContent = "🖨️ Generate Mailing Labels";
+        btn.disabled    = false;
+      }, 100);
+    }
+
+    function generatePDF(opts) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: "in", format: "letter" });
+
+      const PAGE_W   = 8.5;
+      const PAGE_H   = 11;
+      const LBL_W    = 2.625;
+      const LBL_H    = 1.0;
+      const NUM_COLS = 3;
+      const NUM_ROWS = 10;
+      const L_MARGIN = 0.1875;
+      const T_MARGIN = 0.5;
+      const COL_GAP  = 0.125;
+      const PER_PAGE = NUM_COLS * NUM_ROWS;
+      const PADDING  = 0.1;
+      const LINE_H   = 0.17;
+
+      const totalPages = Math.ceil(csvRecords.length / PER_PAGE);
+
+      function drawHeader(pageNum) {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
+        doc.setTextColor(0, 0, 0);
+        doc.text(opts.headerText, PAGE_W / 2, 0.3, { align: "center" });
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.01);
+        doc.line(L_MARGIN, 0.38, PAGE_W - L_MARGIN, 0.38);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.text(`Page ${pageNum} of ${totalPages}`, PAGE_W - L_MARGIN, 0.3, { align: "right" });
+        doc.setFontSize(10);
+      }
+
+      function drawFooter(count) {
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.setTextColor(128, 128, 128);
+        doc.text(
+          `Total Labels: ${count}  |  Generated by Town of Enfield GIS`,
+          PAGE_W / 2, PAGE_H - 0.2, { align: "center" }
+        );
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(10);
+      }
+
+      let pageNum    = 1;
+      let labelCount = 0;
+
+      drawHeader(pageNum);
+
+      // Deduplicate by PARCEL_ID before generating
+      const seen    = new Set();
+      const unique  = csvRecords.filter(r => {
+        const id = r[ID_FIELD] || (r[NAME_FIELD] + r[ADDRESS_FIELD]);
+        if (seen.has(id)) return false;
+        seen.add(id);
+        return true;
+      });
+
+      unique.forEach((record) => {
+        const name    = (record[NAME_FIELD]    || "").trim();
+        const address = (record[ADDRESS_FIELD] || "").trim();
+        if (!name && !address) return;
+
+        const pageIndex = labelCount % PER_PAGE;
+        const col       = pageIndex % NUM_COLS;
+        const row       = Math.floor(pageIndex / NUM_COLS);
+
+        if (labelCount > 0 && pageIndex === 0) {
+          drawFooter(labelCount);
+          doc.addPage();
+          pageNum++;
+          drawHeader(pageNum);
+        }
+
+        const x = L_MARGIN + col * (LBL_W + COL_GAP);
+        const y = T_MARGIN + row * LBL_H;
+
+        if (opts.showBorders) {
+          doc.setDrawColor(200, 200, 200);
+          doc.setLineWidth(0.005);
+          doc.rect(x, y, LBL_W, LBL_H);
+          doc.setDrawColor(0, 0, 0);
+        }
+
+        const tx = x + PADDING;
+        const ty = y + 0.22;
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
+        doc.text(name, tx, ty);
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.text(address,        tx, ty + LINE_H);
+        doc.text(opts.cityState, tx, ty + LINE_H * 2);
+
+        labelCount++;
+      });
+
+      drawFooter(labelCount);
+      doc.save("Abutters_Mailing_Labels.pdf");
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // RESET
+    // ─────────────────────────────────────────────────────────────────
+    function resetApp() {
+      csvRecords      = [];
+      foundFiles      = [];
+      currentFileName = "";
+      document.getElementById("fileInput").value            = "";
+      document.getElementById("upload-error").style.display = "none";
+      document.getElementById("cityState").value   = "Enfield, CT";
+      document.getElementById("headerText").value  = "Town of Enfield - Abutters Notification";
+      document.getElementById("showBorders").checked = false;
+      goToStep("upload");
+    }
+  </script>
+
+</body>
+</html>
