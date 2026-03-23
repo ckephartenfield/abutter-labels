@@ -7,280 +7,290 @@
   <title>Abutters Label Generator | Town of Enfield GIS</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <script>if(typeof JSZip=="undefined"){document.write('<script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"><\/script>');}</script>
+  <script>if(typeof JSZip==="undefined"){document.write('<script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"><\/script>');}</script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: Georgia, 'Times New Roman', serif;
-  background: #f0f2f5;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 40px 20px;
-  color: #374151;
+font-family: Georgia, ‘Times New Roman’, serif;
+background: #f0f2f5;
+min-height: 100vh;
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 40px 20px;
+color: #374151;
 }
 
 .app-header {
-  width: 100%;
-  max-width: 680px;
-  text-align: center;
-  margin-bottom: 28px;
+width: 100%;
+max-width: 680px;
+text-align: center;
+margin-bottom: 28px;
 }
 .app-header-inner {
-  display: inline-flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 8px;
+display: inline-flex;
+align-items: center;
+gap: 14px;
+margin-bottom: 8px;
 }
 .app-logo {
-  width: 52px;
-  height: 52px;
-  background: #1a3a5c;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  flex-shrink: 0;
+width: 52px;
+height: 52px;
+background: #1a3a5c;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 24px;
+flex-shrink: 0;
 }
 .app-title-block { text-align: left; }
 .app-eyebrow {
-  font-size: 11px;
-  color: #6b7280;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  font-family: Arial, sans-serif;
+font-size: 11px;
+color: #6b7280;
+letter-spacing: 2px;
+text-transform: uppercase;
+font-family: Arial, sans-serif;
 }
 .app-title {
-  font-size: 22px;
-  color: #1a3a5c;
-  font-weight: bold;
-  line-height: 1.2;
+font-size: 22px;
+color: #1a3a5c;
+font-weight: bold;
+line-height: 1.2;
 }
 .app-subtitle {
-  font-size: 14px;
-  color: #6b7280;
-  font-family: Arial, sans-serif;
+font-size: 14px;
+color: #6b7280;
+font-family: Arial, sans-serif;
 }
 
 .steps {
-  display: flex;
-  align-items: flex-start;
-  width: 100%;
-  max-width: 680px;
-  margin-bottom: 28px;
+display: flex;
+align-items: flex-start;
+width: 100%;
+max-width: 680px;
+margin-bottom: 28px;
 }
 .step-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex: 1;
+display: flex;
+flex-direction: column;
+align-items: center;
+flex: 1;
 }
 .step-circle {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #d1d5db;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: bold;
-  font-family: Arial, sans-serif;
-  transition: background 0.3s;
+width: 32px;
+height: 32px;
+border-radius: 50%;
+background: #d1d5db;
+color: #fff;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 13px;
+font-weight: bold;
+font-family: Arial, sans-serif;
+transition: background 0.3s;
 }
-.step-circle.active { background: #1a3a5c; } .step-label {
-  font-size: 11px;
-  margin-top: 4px;
-  color: #9ca3af;
-  font-family: Arial, sans-serif;
-  transition: color 0.3s;
+.step-circle.active { background: #1a3a5c; }
+.step-label {
+font-size: 11px;
+margin-top: 4px;
+color: #9ca3af;
+font-family: Arial, sans-serif;
+transition: color 0.3s;
 }
-.step-label.active { color: #1a3a5c; font-weight: bold; } .step-line {
-  height: 2px;
-  flex: 1;
-  background: #d1d5db;
-  margin-bottom: 20px;
-  transition: background 0.3s;
+.step-label.active { color: #1a3a5c; font-weight: bold; }
+.step-line {
+height: 2px;
+flex: 1;
+background: #d1d5db;
+margin-bottom: 20px;
+transition: background 0.3s;
 }
 .step-line.active { background: #1a3a5c; }
 
 .card {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-  width: 100%;
-  max-width: 680px;
-  overflow: hidden;
+background: #fff;
+border-radius: 12px;
+box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+width: 100%;
+max-width: 680px;
+overflow: hidden;
 }
 .card-body { padding: 40px; }
 
-.section-title { font-size: 20px; color: #1a3a5c; margin-bottom: 6px; } .section-desc { font-size: 14px; color: #6b7280; margin-bottom: 24px; font-family: Arial, sans-serif; }
+.section-title { font-size: 20px; color: #1a3a5c; margin-bottom: 6px; }
+.section-desc { font-size: 14px; color: #6b7280; margin-bottom: 24px; font-family: Arial, sans-serif; }
 
 .dropzone {
-  border: 2px dashed #d1d5db;
-  border-radius: 8px;
-  padding: 48px 24px;
-  text-align: center;
-  cursor: pointer;
-  background: #fafafa;
-  transition: all 0.2s;
+border: 2px dashed #d1d5db;
+border-radius: 8px;
+padding: 48px 24px;
+text-align: center;
+cursor: pointer;
+background: #fafafa;
+transition: all 0.2s;
 }
 .dropzone:hover, .dropzone.dragging {
-  border-color: #1a3a5c;
-  background: #f0f4f8;
+border-color: #1a3a5c;
+background: #f0f4f8;
 }
-.dropzone-icon { font-size: 40px; margin-bottom: 12px; } .dropzone-title { font-size: 16px; color: #374151; font-weight: bold; margin-bottom: 6px; font-family: Arial, sans-serif; } .dropzone-hint { font-size: 13px; color: #9ca3af; font-family: Arial, sans-serif; }
+.dropzone-icon { font-size: 40px; margin-bottom: 12px; }
+.dropzone-title { font-size: 16px; color: #374151; font-weight: bold; margin-bottom: 6px; font-family: Arial, sans-serif; }
+.dropzone-hint { font-size: 13px; color: #9ca3af; font-family: Arial, sans-serif; }
 
 .info-box {
-  margin-top: 24px;
-  padding: 16px;
-  background: #f0f4f8;
-  border-radius: 8px;
-  border-left: 4px solid #1a3a5c;
+margin-top: 24px;
+padding: 16px;
+background: #f0f4f8;
+border-radius: 8px;
+border-left: 4px solid #1a3a5c;
 }
-.info-box-title { font-size: 13px; color: #374151; font-weight: bold; margin-bottom: 8px; font-family: Arial, sans-serif; } .info-box ol { padding-left: 20px; font-size: 13px; color: #6b7280; line-height: 1.9; font-family: Arial, sans-serif; }
+.info-box-title { font-size: 13px; color: #374151; font-weight: bold; margin-bottom: 8px; font-family: Arial, sans-serif; }
+.info-box ol { padding-left: 20px; font-size: 13px; color: #6b7280; line-height: 1.9; font-family: Arial, sans-serif; }
 
-.badge-success {
-  display: inline-block;
-  background: #dcfce7;
-  color: #16a34a;
-  border-radius: 20px;
-  padding: 3px 10px;
-  font-size: 12px;
-  font-weight: bold;
-  font-family: Arial, sans-serif;
-  margin-right: 8px;
+/* FIX 1: Record count shown prominently, no filename */
+.record-count-bar {
+display: flex;
+align-items: center;
+margin-bottom: 16px;
 }
-.file-name { font-size: 13px; color: #6b7280; font-family: Arial, sans-serif; }
+.badge-success {
+display: inline-block;
+background: #dcfce7;
+color: #16a34a;
+border-radius: 20px;
+padding: 5px 14px;
+font-size: 13px;
+font-weight: bold;
+font-family: Arial, sans-serif;
+}
 
 .form-section {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
+background: #f8fafc;
+border: 1px solid #e2e8f0;
+border-radius: 8px;
+padding: 20px;
+margin-bottom: 20px;
 }
-.form-section-title { font-size: 13px; font-weight: bold; color: #374151; margin-bottom: 16px; font-family: Arial, sans-serif; } .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; } .form-label { font-size: 12px; color: #6b7280; font-family: Arial, sans-serif; } .form-label span { color: #dc2626; } .form-control {
-  width: 100%;
-  padding: 8px 10px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 13px;
-  font-family: Arial, sans-serif;
-  background: #fff;
-  color: #374151;
+.form-section-title { font-size: 13px; font-weight: bold; color: #374151; margin-bottom: 16px; font-family: Arial, sans-serif; }
+.form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.form-label { font-size: 12px; color: #6b7280; font-family: Arial, sans-serif; }
+.form-label span { color: #dc2626; }
+.form-control {
+width: 100%;
+padding: 8px 10px;
+border: 1px solid #d1d5db;
+border-radius: 6px;
+font-size: 13px;
+font-family: Arial, sans-serif;
+background: #fff;
+color: #374151;
 }
-.form-control:focus { outline: 2px solid #1a3a5c; border-color: transparent; } .checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  font-size: 13px;
-  color: #374151;
-  font-family: Arial, sans-serif;
+.form-control:focus { outline: 2px solid #1a3a5c; border-color: transparent; }
+.checkbox-label {
+display: flex;
+align-items: center;
+gap: 10px;
+cursor: pointer;
+font-size: 13px;
+color: #374151;
+font-family: Arial, sans-serif;
 }
-.checkbox-label input { width: 16px; height: 16px; cursor: pointer; } .checkbox-muted { color: #9ca3af; }
-
-.csv-files-found {
-  background: #f0f9ff;
-  border: 1px solid #bae6fd;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 20px;
-}
-.csv-files-title { font-size: 13px; font-weight: bold; color: #0369a1; margin-bottom: 10px; font-family: Arial, sans-serif; } .csv-file-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-family: Arial, sans-serif;
-  padding: 4px 0;
-  color: #374151;
-}
-.csv-file-item .status-used { color: #16a34a; font-weight: bold; } .csv-file-item .status-ignored { color: #9ca3af; }
+.checkbox-label input { width: 16px; height: 16px; cursor: pointer; }
+.checkbox-muted { color: #9ca3af; }
 
 .preview-box {
-  background: #fffbeb;
-  border: 1px solid #fcd34d;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 24px;
+background: #fffbeb;
+border: 1px solid #fcd34d;
+border-radius: 8px;
+padding: 16px;
+margin-bottom: 24px;
 }
-.preview-box-title { font-weight: bold; color: #92400e; margin-bottom: 8px; font-size: 13px; font-family: Arial, sans-serif; } .label-preview {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 12px 16px;
-  font-family: 'Courier New', monospace;
-  font-size: 13px;
-  line-height: 1.8;
-  color: #374151;
+.preview-box-title { font-weight: bold; color: #92400e; margin-bottom: 8px; font-size: 13px; font-family: Arial, sans-serif; }
+.label-preview {
+background: #fff;
+border: 1px solid #e5e7eb;
+border-radius: 6px;
+padding: 12px 16px;
+font-family: ‘Courier New’, monospace;
+font-size: 13px;
+line-height: 1.8;
+color: #374151;
 }
 .preview-meta { color: #92400e; margin-top: 8px; font-size: 12px; font-family: Arial, sans-serif; }
 
 .alert-error {
-  margin-bottom: 16px;
-  padding: 10px 14px;
-  background: #fef2f2;
-  border: 1px solid #fca5a5;
-  border-radius: 6px;
-  color: #dc2626;
-  font-size: 13px;
-  font-family: Arial, sans-serif;
+margin-bottom: 16px;
+padding: 10px 14px;
+background: #fef2f2;
+border: 1px solid #fca5a5;
+border-radius: 6px;
+color: #dc2626;
+font-size: 13px;
+font-family: Arial, sans-serif;
 }
 .alert-warning {
-  margin-bottom: 16px;
-  padding: 10px 14px;
-  background: #fffbeb;
-  border: 1px solid #fcd34d;
-  border-radius: 6px;
-  color: #92400e;
-  font-size: 13px;
-  font-family: Arial, sans-serif;
+margin-bottom: 16px;
+padding: 10px 14px;
+background: #fffbeb;
+border: 1px solid #fcd34d;
+border-radius: 6px;
+color: #92400e;
+font-size: 13px;
+font-family: Arial, sans-serif;
 }
 
 .btn-row { display: flex; gap: 12px; }
 .btn {
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  font-family: Arial, sans-serif;
-  transition: opacity 0.2s;
+padding: 10px 20px;
+border-radius: 6px;
+font-size: 14px;
+cursor: pointer;
+font-family: Arial, sans-serif;
+transition: opacity 0.2s;
 }
 .btn:hover { opacity: 0.88; }
-.btn-secondary { border: 1px solid #d1d5db; background: #fff; color: #374151; } .btn-primary {
-  border: none;
-  background: #1a3a5c;
-  color: #fff;
-  font-weight: bold;
-  flex: 1;
-  font-size: 15px;
-  padding: 12px 24px;
+.btn-secondary { border: 1px solid #d1d5db; background: #fff; color: #374151; }
+.btn-primary {
+border: none;
+background: #1a3a5c;
+color: #fff;
+font-weight: bold;
+flex: 1;
+font-size: 15px;
+padding: 12px 24px;
 }
-.btn-primary:disabled { background: #9ca3af; cursor: not-allowed; } .btn-outline { border: 1px solid #d1d5db; background: #fff; color: #374151; } .btn-dark { border: none; background: #1a3a5c; color: #fff; font-weight: bold; padding: 10px 24px; }
+.btn-primary:disabled { background: #9ca3af; cursor: not-allowed; }
+.btn-outline { border: 1px solid #d1d5db; background: #fff; color: #374151; }
+.btn-dark { border: none; background: #1a3a5c; color: #fff; font-weight: bold; padding: 10px 24px; }
 
-.done-screen { padding: 40px; text-align: center; } .done-icon { font-size: 64px; margin-bottom: 16px; } .done-title { font-size: 24px; color: #1a3a5c; margin-bottom: 8px; } .done-file { color: #6b7280; font-size: 15px; margin-bottom: 6px; font-family: Arial, sans-serif; } .done-meta { color: #9ca3af; font-size: 13px; margin-bottom: 32px; font-family: Arial, sans-serif; } .print-box {
-  background: #f0f4f8;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 32px;
-  text-align: left;
-  border-left: 4px solid #1a3a5c;
+.done-screen { padding: 40px; text-align: center; }
+.done-icon { font-size: 64px; margin-bottom: 16px; }
+.done-title { font-size: 24px; color: #1a3a5c; margin-bottom: 8px; }
+.done-file { color: #6b7280; font-size: 15px; margin-bottom: 6px; font-family: Arial, sans-serif; }
+.done-meta { color: #9ca3af; font-size: 13px; margin-bottom: 32px; font-family: Arial, sans-serif; }
+.print-box {
+background: #f0f4f8;
+border-radius: 8px;
+padding: 20px;
+margin-bottom: 32px;
+text-align: left;
+border-left: 4px solid #1a3a5c;
 }
-.print-box-title { font-size: 13px; font-weight: bold; color: #374151; margin-bottom: 8px; font-family: Arial, sans-serif; } .print-box ol { padding-left: 20px; font-size: 13px; color: #6b7280; line-height: 1.9; font-family: Arial, sans-serif; } .done-btn-row { display: flex; gap: 12px; justify-content: center; }
+.print-box-title { font-size: 13px; font-weight: bold; color: #374151; margin-bottom: 8px; font-family: Arial, sans-serif; }
+.print-box ol { padding-left: 20px; font-size: 13px; color: #6b7280; line-height: 1.9; font-family: Arial, sans-serif; }
+.done-btn-row { display: flex; gap: 12px; justify-content: center; }
 
 .app-footer { margin-top: 24px; font-size: 12px; color: #9ca3af; text-align: center; font-family: Arial, sans-serif; }
 
 @media (max-width: 520px) {
-  .app-header-inner { flex-direction: column; text-align: center; }
-  .app-title-block { text-align: center; } }
+.app-header-inner { flex-direction: column; text-align: center; }
+.app-title-block { text-align: center; }
+}
+</style>
 
-  </style>
 </head>
 <body>
 
@@ -316,6 +326,7 @@ body {
 
   <div class="card">
 
+```
 <!-- STEP 1: UPLOAD -->
 <div id="screen-upload" class="card-body">
   <h2 class="section-title">Upload Your ZIP Export</h2>
@@ -345,22 +356,17 @@ body {
 </div>
 
 <!-- STEP 2: CONFIGURE -->
+<!-- FIX 1: Record count shown first and prominently, no filename, no files-found panel -->
 <div id="screen-configure" class="card-body" style="display:none;">
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+
+  <div class="record-count-bar">
     <span class="badge-success" id="record-count-badge">0 records loaded</span>
-    <span class="file-name" id="file-name-display"></span>
   </div>
 
   <h2 class="section-title">Configure Label Settings</h2>
   <p class="section-desc" style="margin-bottom:20px;">
-    Review the extracted CSV and customize your label layout.
+    Review and customize your label layout before generating.
   </p>
-
-  <!-- CSV Files Found -->
-  <div class="csv-files-found">
-    <div class="csv-files-title">📂 Files found in ZIP</div>
-    <div id="csv-files-list"></div>
-  </div>
 
   <!-- Label Options -->
   <div class="form-section">
@@ -383,6 +389,7 @@ body {
   </div>
 
   <!-- Preview -->
+  <!-- FIX 3: "+" stripped from name in preview -->
   <div class="preview-box">
     <div class="preview-box-title">📋 Label Preview</div>
     <div class="label-preview">
@@ -427,6 +434,9 @@ body {
     <button class="btn btn-dark" onclick="resetApp()">Generate New Labels</button>
   </div>
 </div>
+```
+
+  </div>
 
   <div class="app-footer">
     Town of Enfield GIS Division &nbsp;·&nbsp; Avery 5160 &nbsp;·&nbsp; 30 labels per sheet
@@ -442,7 +452,6 @@ body {
 
     // ─────────────────────────────────────────────────────────────────
     // TARGET CSV FILENAMES
-    // The app looks for these specific files inside the ZIP
     // ─────────────────────────────────────────────────────────────────
     const TARGET_INTERSECTS = "Parcels (Contains Intersects) (proximity)";
     const TARGET_WITHIN     = "Parcels (Fully Within) (proximity)";
@@ -453,6 +462,15 @@ body {
     const NAME_FIELD    = "SLH_OWN_NAME";
     const ADDRESS_FIELD = "LOCATION";
     const ID_FIELD      = "PARCEL_ID";
+
+    // ─────────────────────────────────────────────────────────────────
+    // FIX 3: Clean name — strip leading/trailing "+" and whitespace
+    // ─────────────────────────────────────────────────────────────────
+    function cleanName(raw) {
+      if (!raw) return "";
+      // Remove standalone "+" tokens at start or end
+      return raw.replace(/^\s*\+\s*/, "").replace(/\s*\+\s*$/, "").trim();
+    }
 
     // ─────────────────────────────────────────────────────────────────
     // STEP NAVIGATION
@@ -529,7 +547,6 @@ body {
       currentFileName = file.name;
 
       try {
-        // Load JSZip
         if (!window.JSZip) {
           errEl.textContent = "⚠️ ZIP library not loaded. Please check your internet connection and refresh.";
           errEl.style.display = "block";
@@ -546,17 +563,9 @@ body {
           return;
         }
 
-        // Find the target CSV files
-        const intersectsFile = foundFiles.find(f =>
-          f.includes(TARGET_INTERSECTS)
-        );
-        const withinFile = foundFiles.find(f =>
-          f.includes(TARGET_WITHIN)
-        );
-
-        // Determine which file to use
-        // Priority: intersects first then within then first available
-        const targetFile = intersectsFile || withinFile || foundFiles[0];
+        const intersectsFile = foundFiles.find(f => f.includes(TARGET_INTERSECTS));
+        const withinFile     = foundFiles.find(f => f.includes(TARGET_WITHIN));
+        const targetFile     = intersectsFile || withinFile || foundFiles[0];
 
         if (!targetFile) {
           errEl.textContent = "⚠️ Could not find the expected CSV file in the ZIP.";
@@ -564,7 +573,6 @@ body {
           return;
         }
 
-        // Extract and parse the target CSV
         const csvText = await zip.files[targetFile].async("string");
         const records = parseCSV(csvText);
 
@@ -575,7 +583,7 @@ body {
         }
 
         csvRecords = records;
-        setupConfigureScreen(foundFiles, targetFile);
+        setupConfigureScreen();
         goToStep("configure");
 
       } catch(err) {
@@ -604,27 +612,13 @@ body {
 
     // ─────────────────────────────────────────────────────────────────
     // CONFIGURE SCREEN
+    // FIX 1: Show record count prominently; no filename; no files panel
     // ─────────────────────────────────────────────────────────────────
-    function setupConfigureScreen(allFiles, usedFile) {
+    function setupConfigureScreen() {
       document.getElementById("record-count-badge").textContent =
         `✓ ${csvRecords.length} records loaded`;
-      document.getElementById("file-name-display").textContent = currentFileName;
 
-      // Show which files were found and which is being used
-      const listEl = document.getElementById("csv-files-list");
-      listEl.innerHTML = allFiles.map(f => {
-        const isUsed    = f === usedFile;
-        const shortName = f.split("/").pop();
-        return `
-          <div class="csv-file-item">
-            <span>${isUsed ? "✅" : "⬜"}</span>
-            <span class="${isUsed ? "status-used" : "status-ignored"}">${shortName}</span>
-            ${isUsed ? '<span style="font-size:11px;color:#16a34a;font-family:Arial,sans-serif;">(using this file)</span>' : '<span style="font-size:11px;color:#9ca3af;font-family:Arial,sans-serif;">(ignored)</span>'}
-          </div>
-        `;
-      }).join("");
-
-      // Check for required fields
+      // Warn if required fields are missing
       const warnEl  = document.getElementById("configure-warning");
       const sample  = csvRecords[0] || {};
       const hasName = NAME_FIELD in sample;
@@ -640,15 +634,15 @@ body {
       }
 
       updatePreview();
-
       document.getElementById("cityState").addEventListener("input", updatePreview);
     }
 
+    // FIX 3: cleanName applied in preview
     function updatePreview() {
       const cityState = document.getElementById("cityState").value;
       const sample    = csvRecords[0] || {};
 
-      document.getElementById("preview-name").textContent    = sample[NAME_FIELD]    || "OWNER NAME";
+      document.getElementById("preview-name").textContent    = cleanName(sample[NAME_FIELD])    || "OWNER NAME";
       document.getElementById("preview-address").textContent = sample[ADDRESS_FIELD] || "123 MAIN STREET";
       document.getElementById("preview-city").textContent    = cityState || "Enfield, CT";
 
@@ -743,9 +737,9 @@ body {
 
       drawHeader(pageNum);
 
-      // Deduplicate by PARCEL_ID before generating
-      const seen    = new Set();
-      const unique  = csvRecords.filter(r => {
+      // Deduplicate by PARCEL_ID
+      const seen   = new Set();
+      const unique = csvRecords.filter(r => {
         const id = r[ID_FIELD] || (r[NAME_FIELD] + r[ADDRESS_FIELD]);
         if (seen.has(id)) return false;
         seen.add(id);
@@ -753,7 +747,8 @@ body {
       });
 
       unique.forEach((record) => {
-        const name    = (record[NAME_FIELD]    || "").trim();
+        // FIX 3: cleanName strips leading/trailing "+"
+        const name    = cleanName(record[NAME_FIELD]    || "");
         const address = (record[ADDRESS_FIELD] || "").trim();
         if (!name && !address) return;
 
@@ -794,7 +789,20 @@ body {
       });
 
       drawFooter(labelCount);
-      doc.save("Abutters_Mailing_Labels.pdf");
+
+      // FIX 4: Use blob URL for download — works reliably inside iframes
+      const blob    = doc.output("blob");
+      const blobUrl = URL.createObjectURL(blob);
+      const a       = document.createElement("a");
+      a.href        = blobUrl;
+      a.download    = "Abutters_Mailing_Labels.pdf";
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+      }, 1000);
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -804,13 +812,14 @@ body {
       csvRecords      = [];
       foundFiles      = [];
       currentFileName = "";
-      document.getElementById("fileInput").value            = "";
-      document.getElementById("upload-error").style.display = "none";
-      document.getElementById("cityState").value   = "Enfield, CT";
-      document.getElementById("headerText").value  = "Town of Enfield - Abutters Notification";
+      document.getElementById("fileInput").value             = "";
+      document.getElementById("upload-error").style.display  = "none";
+      document.getElementById("cityState").value    = "Enfield, CT";
+      document.getElementById("headerText").value   = "Town of Enfield - Abutters Notification";
       document.getElementById("showBorders").checked = false;
       goToStep("upload");
     }
   </script>
+
 </body>
 </html>
