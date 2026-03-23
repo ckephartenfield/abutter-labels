@@ -242,7 +242,18 @@ font-size: 13px;
 font-family: Arial, sans-serif;
 }
 
-.btn-row { display: flex; gap: 12px; }
+.alert-info {
+padding: 12px 14px;
+background: #eff6ff;
+border: 1px solid #93c5fd;
+border-radius: 6px;
+color: #1e40af;
+font-size: 13px;
+font-family: Arial, sans-serif;
+margin-bottom: 16px;
+}
+.alert-info-title { font-weight: bold; margin-bottom: 6px; }
+.alert-info ul { padding-left: 18px; line-height: 1.8; margin-top: 4px; }
 .btn {
 padding: 10px 20px;
 border-radius: 6px;
@@ -343,15 +354,7 @@ border-left: 4px solid #1a3a5c;
 
   <div class="alert-error" id="upload-error" style="display:none;margin-top:16px;"></div>
 
-  <div class="info-box">
-    <div class="info-box-title">How to export from Experience Builder:</div>
-    <ol>
-      <li>Run your Near Me / Abutters search on the map</li>
-      <li>Click the <strong>Export</strong> button in the Near Me widget</li>
-      <li>Save the <strong>ZIP file</strong> to your computer</li>
-      <li>Upload the ZIP here — the correct CSV is extracted automatically</li>
-    </ol>
-  </div>
+
 </div>
 
 <!-- STEP 2: CONFIGURE -->
@@ -397,6 +400,12 @@ border-left: 4px solid #1a3a5c;
       <span id="preview-city">Enfield, CT</span>
     </div>
     <div class="preview-meta" id="preview-meta">— labels · — page(s) · Avery 5160 format</div>
+  </div>
+
+  <div class="alert-info" id="duplicate-notice" style="display:none;">
+    <div class="alert-info-title">ℹ️ Duplicate Records Removed</div>
+    <div id="duplicate-summary"></div>
+    <ul id="duplicate-list"></ul>
   </div>
 
   <div class="alert-error" id="configure-error" style="display:none;"></div>
@@ -613,8 +622,52 @@ border-left: 4px solid #1a3a5c;
     // FIX 1: Show record count prominently; no filename; no files panel
     // ─────────────────────────────────────────────────────────────────
     function setupConfigureScreen() {
+      // ── Deduplicate by PARCEL_ID + SLH_OWN_NAME ──
+      const seen        = new Set();
+      const dupeNames   = [];
+      const deduped     = [];
+
+      csvRecords.forEach(r => {
+        const id   = (r[ID_FIELD]   || "").trim();
+        const name = (r[NAME_FIELD] || "").trim();
+        const key  = id && name ? `${id}||${name}` : null;
+
+        if (!key) {
+          // No key available — keep record
+          deduped.push(r);
+        } else if (seen.has(key)) {
+          // Duplicate — record the name if not already noted
+          const cleanedName = cleanName(name);
+          if (!dupeNames.includes(cleanedName)) dupeNames.push(cleanedName);
+        } else {
+          seen.add(key);
+          deduped.push(r);
+        }
+      });
+
+      // Replace csvRecords with deduped set
+      csvRecords = deduped;
+
       document.getElementById("record-count-badge").textContent =
         `✓ ${csvRecords.length} records loaded`;
+
+      // Show duplicate notice if any were removed
+      const noticeEl  = document.getElementById("duplicate-notice");
+      const summaryEl = document.getElementById("duplicate-summary");
+      const listEl    = document.getElementById("duplicate-list");
+
+      if (dupeNames.length > 0) {
+        const removedCount = csvRecords.length;
+        summaryEl.textContent =
+          `While performing the analysis, duplicate records were found and all duplicates were removed. ` +
+          `${csvRecords.length} labels will be generated.`;
+        listEl.innerHTML = dupeNames.map(n =>
+          `<li>Duplicate records found for <strong>${n}</strong> — all duplicates removed.</li>`
+        ).join("");
+        noticeEl.style.display = "block";
+      } else {
+        noticeEl.style.display = "none";
+      }
 
       // Warn if required fields are missing
       const warnEl  = document.getElementById("configure-warning");
@@ -702,16 +755,8 @@ border-left: 4px solid #1a3a5c;
       const PADDING  = 0.1;
       const LINE_H   = 0.17;
 
-      // Deduplicate BEFORE calculating total pages
-      const seen   = new Set();
-      const unique = csvRecords.filter(r => {
-        const id = (r[ID_FIELD] || "").trim();
-        if (id === "") return true; // no ID — keep record, skip dedup
-        if (seen.has(id)) return false;
-        seen.add(id);
-        return true;
-      });
-
+      // csvRecords already deduplicated in setupConfigureScreen
+      const unique     = csvRecords;
       const totalPages = Math.ceil(unique.length / PER_PAGE);
 
       function drawHeader(pageNum) {
