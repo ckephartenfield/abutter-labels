@@ -788,8 +788,10 @@ border-left: 4px solid #1a3a5c;
 
       drawFooter(labelCount);
 
-      // FIX 4: Open PDF in new tab — most reliable method inside an iframe
-      doc.output("dataurlnewwindow", { filename: "Abutters_Mailing_Labels.pdf" });
+      // FIX 4: Blob URL opened in new window — works in Chrome and all browsers
+      const pdfBlob = doc.output("blob");
+      const pdfUrl  = URL.createObjectURL(pdfBlob);
+      window.open(pdfUrl, "_blank");
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -807,5 +809,6 @@ border-left: 4px solid #1a3a5c;
       goToStep("upload");
     }
   </script>
+
 </body>
 </html>
