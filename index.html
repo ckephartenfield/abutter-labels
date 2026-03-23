@@ -771,17 +771,24 @@ border-left: 4px solid #1a3a5c;
           doc.setDrawColor(0, 0, 0);
         }
 
-        const tx = x + PADDING;
-        const ty = y + 0.22;
+        const tx      = x + PADDING;
+        const maxW    = LBL_W - (PADDING * 2);  // usable text width
 
+        // Split long names onto multiple lines
         doc.setFont("helvetica", "bold");
         doc.setFontSize(10);
-        doc.text(name, tx, ty);
+        const nameLines = doc.splitTextToSize(name, maxW);
+
+        // If name is 2+ lines, shift address/city down accordingly
+        const nameBlockH = nameLines.length * LINE_H;
+        const ty         = y + 0.22;
+
+        doc.text(nameLines, tx, ty);
 
         doc.setFont("helvetica", "normal");
         doc.setFontSize(10);
-        doc.text(address,        tx, ty + LINE_H);
-        doc.text(opts.cityState, tx, ty + LINE_H * 2);
+        doc.text(address,        tx, ty + nameBlockH);
+        doc.text(opts.cityState, tx, ty + nameBlockH + LINE_H);
 
         labelCount++;
       });
