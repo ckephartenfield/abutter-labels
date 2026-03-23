@@ -244,15 +244,16 @@ font-family: Arial, sans-serif;
 
 .alert-info {
 padding: 12px 14px;
-background: #eff6ff;
-border: 1px solid #93c5fd;
+background: #fff3cd;
+border: 2px solid #e67e00;
+border-left: 6px solid #e67e00;
 border-radius: 6px;
-color: #1e40af;
+color: #4a2800;
 font-size: 13px;
 font-family: Arial, sans-serif;
 margin-bottom: 16px;
 }
-.alert-info-title { font-weight: bold; margin-bottom: 6px; }
+.alert-info-title { font-weight: bold; margin-bottom: 6px; font-size: 14px; }
 .alert-info ul { padding-left: 18px; line-height: 1.8; margin-top: 4px; }
 .btn {
 padding: 10px 20px;
@@ -336,7 +337,6 @@ border-left: 4px solid #1a3a5c;
   </div>
 
   <div class="card">
-
 <!-- STEP 1: UPLOAD -->
 <div id="screen-upload" class="card-body">
   <h2 class="section-title">Upload Your ZIP Export</h2>
@@ -354,15 +354,20 @@ border-left: 4px solid #1a3a5c;
 
   <div class="alert-error" id="upload-error" style="display:none;margin-top:16px;"></div>
 
-
 </div>
-
+    
 <!-- STEP 2: CONFIGURE -->
 <!-- FIX 1: Record count shown first and prominently, no filename, no files-found panel -->
 <div id="screen-configure" class="card-body" style="display:none;">
 
   <div class="record-count-bar">
     <span class="badge-success" id="record-count-badge">0 records loaded</span>
+  </div>
+
+  <div class="alert-info" id="duplicate-notice" style="display:none;">
+    <div class="alert-info-title">⚠️ Duplicate Records Removed</div>
+    <div id="duplicate-summary"></div>
+    <ul id="duplicate-list"></ul>
   </div>
 
   <h2 class="section-title">Configure Label Settings</h2>
@@ -402,12 +407,6 @@ border-left: 4px solid #1a3a5c;
     <div class="preview-meta" id="preview-meta">— labels · — page(s) · Avery 5160 format</div>
   </div>
 
-  <div class="alert-info" id="duplicate-notice" style="display:none;">
-    <div class="alert-info-title">ℹ️ Duplicate Records Removed</div>
-    <div id="duplicate-summary"></div>
-    <ul id="duplicate-list"></ul>
-  </div>
-
   <div class="alert-error" id="configure-error" style="display:none;"></div>
   <div class="alert-warning" id="configure-warning" style="display:none;"></div>
 
@@ -442,7 +441,6 @@ border-left: 4px solid #1a3a5c;
     <button class="btn btn-dark" onclick="resetApp()">Generate New Labels</button>
   </div>
 </div>
-
   </div>
 
   <div class="app-footer">
