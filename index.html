@@ -326,6 +326,7 @@ border-left: 4px solid #1a3a5c;
 
   <div class="card">
 
+```
 <!-- STEP 1: UPLOAD -->
 <div id="screen-upload" class="card-body">
   <h2 class="section-title">Upload Your ZIP Export</h2>
@@ -433,6 +434,7 @@ border-left: 4px solid #1a3a5c;
     <button class="btn btn-dark" onclick="resetApp()">Generate New Labels</button>
   </div>
 </div>
+```
 
   </div>
 
@@ -788,19 +790,8 @@ border-left: 4px solid #1a3a5c;
 
       drawFooter(labelCount);
 
-      // FIX 4: Use blob URL for download — works reliably inside iframes
-      const blob    = doc.output("blob");
-      const blobUrl = URL.createObjectURL(blob);
-      const a       = document.createElement("a");
-      a.href        = blobUrl;
-      a.download    = "Abutters_Mailing_Labels.pdf";
-      a.style.display = "none";
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(blobUrl);
-      }, 1000);
+      // FIX 4: Open PDF in new tab — most reliable method inside an iframe
+      doc.output("dataurlnewwindow", { filename: "Abutters_Mailing_Labels.pdf" });
     }
 
     // ─────────────────────────────────────────────────────────────────
