@@ -702,7 +702,17 @@ border-left: 4px solid #1a3a5c;
       const PADDING  = 0.1;
       const LINE_H   = 0.17;
 
-      const totalPages = Math.ceil(csvRecords.length / PER_PAGE);
+      // Deduplicate BEFORE calculating total pages
+      const seen   = new Set();
+      const unique = csvRecords.filter(r => {
+        const id = (r[ID_FIELD] || "").trim();
+        if (id === "") return true; // no ID — keep record, skip dedup
+        if (seen.has(id)) return false;
+        seen.add(id);
+        return true;
+      });
+
+      const totalPages = Math.ceil(unique.length / PER_PAGE);
 
       function drawHeader(pageNum) {
         doc.setFont("helvetica", "bold");
@@ -735,16 +745,8 @@ border-left: 4px solid #1a3a5c;
 
       drawHeader(pageNum);
 
-      // Deduplicate by PARCEL_ID
-      const seen   = new Set();
-      const unique = csvRecords.filter(r => {
-        const id = r[ID_FIELD] || (r[NAME_FIELD] + r[ADDRESS_FIELD]);
-        if (seen.has(id)) return false;
-        seen.add(id);
-        return true;
-      });
-
       unique.forEach((record) => {
+        try {
         // FIX 3: cleanName strips leading/trailing "+"
         const name    = cleanName(record[NAME_FIELD]    || "");
         const address = (record[ADDRESS_FIELD] || "").trim();
@@ -771,26 +773,26 @@ border-left: 4px solid #1a3a5c;
           doc.setDrawColor(0, 0, 0);
         }
 
-        const tx      = x + PADDING;
-        const maxW    = LBL_W - (PADDING * 2);  // usable text width
+        const tx   = x + PADDING;
+        const maxW = LBL_W - (PADDING * 2);
+        const ty   = y + 0.22;
 
-        // Split long names onto multiple lines
         doc.setFont("helvetica", "bold");
         doc.setFontSize(10);
-        const nameLines = doc.splitTextToSize(name, maxW);
 
-        // If name is 2+ lines, shift address/city down accordingly
-        const nameBlockH = nameLines.length * LINE_H;
-        const ty         = y + 0.22;
+        // Guard: only split if name is non-empty
+        const nameLines  = name ? doc.splitTextToSize(name, maxW) : [];
+        const nameBlockH = nameLines.length > 0 ? nameLines.length * LINE_H : LINE_H;
 
-        doc.text(nameLines, tx, ty);
+        if (nameLines.length > 0) doc.text(nameLines, tx, ty);
 
         doc.setFont("helvetica", "normal");
         doc.setFontSize(10);
-        doc.text(address,        tx, ty + nameBlockH);
-        doc.text(opts.cityState, tx, ty + nameBlockH + LINE_H);
+        if (address)        doc.text(address,        tx, ty + nameBlockH);
+        if (opts.cityState) doc.text(opts.cityState, tx, ty + nameBlockH + LINE_H);
 
         labelCount++;
+        } catch(e) { console.warn("Skipped record due to error:", e); }
       });
 
       drawFooter(labelCount);
@@ -816,6 +818,5 @@ border-left: 4px solid #1a3a5c;
       goToStep("upload");
     }
   </script>
-
 </body>
 </html>
