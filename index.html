@@ -1,3 +1,8 @@
+
+Chris Kephart
+3:08 PM (0 minutes ago)
+to me
+
 <!DOCTYPE html>
 
 <html lang="en">
@@ -150,7 +155,6 @@ border-left: 4px solid #1a3a5c;
 .info-box-title { font-size: 13px; color: #374151; font-weight: bold; margin-bottom: 8px; font-family: Arial, sans-serif; }
 .info-box ol { padding-left: 20px; font-size: 13px; color: #6b7280; line-height: 1.9; font-family: Arial, sans-serif; }
 
-/* FIX 1: Record count shown prominently, no filename */
 .record-count-bar {
 display: flex;
 align-items: center;
@@ -355,9 +359,9 @@ border-left: 4px solid #1a3a5c;
   <div class="alert-error" id="upload-error" style="display:none;margin-top:16px;"></div>
 
 </div>
-    
+
 <!-- STEP 2: CONFIGURE -->
-<!-- FIX 1: Record count shown first and prominently, no filename, no files-found panel -->
+
 <div id="screen-configure" class="card-body" style="display:none;">
 
   <div class="record-count-bar">
@@ -376,12 +380,9 @@ border-left: 4px solid #1a3a5c;
   </p>
 
   <!-- Label Options -->
+
   <div class="form-section">
     <div class="form-section-title">Label Options</div>
-    <div class="form-group">
-      <label class="form-label">City / State (printed on every label)</label>
-      <input class="form-control" type="text" id="cityState" value="Enfield, CT" />
-    </div>
     <div class="form-group">
       <label class="form-label">Page Header Text</label>
       <input class="form-control" type="text" id="headerText" value="Town of Enfield - Abutters Notification" />
@@ -396,13 +397,13 @@ border-left: 4px solid #1a3a5c;
   </div>
 
   <!-- Preview -->
-  <!-- FIX 3: "+" stripped from name in preview -->
+
   <div class="preview-box">
     <div class="preview-box-title">📋 Label Preview</div>
     <div class="label-preview">
       <strong id="preview-name">OWNER NAME</strong><br />
       <span id="preview-address">123 MAIN STREET</span><br />
-      <span id="preview-city">Enfield, CT</span>
+      <span id="preview-citystatezip">ENFIELD, CT 06082</span>
     </div>
     <div class="preview-meta" id="preview-meta">— labels · — page(s) · Avery 5160 format</div>
   </div>
@@ -419,6 +420,7 @@ border-left: 4px solid #1a3a5c;
 </div>
 
 <!-- STEP 3: DONE -->
+
 <div id="screen-done" class="done-screen" style="display:none;">
   <div class="done-icon">✅</div>
   <h2 class="done-title">Labels Generated!</h2>
@@ -456,25 +458,37 @@ border-left: 4px solid #1a3a5c;
     let foundFiles   = [];
 
     // ─────────────────────────────────────────────────────────────────
-    // TARGET CSV FILENAMES
+    // TARGET CSV FILENAME
     // ─────────────────────────────────────────────────────────────────
-    const TARGET_INTERSECTS = "Parcels (Contains Intersects) (proximity)";
-    const TARGET_WITHIN     = "Parcels (Fully Within) (proximity)";
+    const TARGET_ADJACENT = "Adjacent Parcels (Proximity)";
 
     // ─────────────────────────────────────────────────────────────────
     // FIELD NAMES
     // ─────────────────────────────────────────────────────────────────
     const NAME_FIELD    = "SLH_OWN_NAME";
-    const ADDRESS_FIELD = "LOCATION";
+    const ADDRESS_FIELD = "SLH_OWN_ADDR";
+    const CITY_FIELD    = "SLH_CITY";
+    const STATE_FIELD   = "SLH_STT";
+    const ZIP_FIELD     = "SLH_ZIP";
     const ID_FIELD      = "PARCEL_ID";
 
     // ─────────────────────────────────────────────────────────────────
-    // FIX 3: Clean name — strip leading/trailing "+" and whitespace
+    // HELPERS
     // ─────────────────────────────────────────────────────────────────
     function cleanName(raw) {
       if (!raw) return "";
-      // Remove standalone "+" tokens at start or end
       return raw.replace(/^\s*\+\s*/, "").replace(/\s*\+\s*$/, "").trim();
+    }
+
+    // Build the city/state/zip line from record fields
+    function buildCityStateLine(record) {
+      const city  = (record[CITY_FIELD]  || "").trim();
+      const state = (record[STATE_FIELD] || "").trim();
+      const zip   = (record[ZIP_FIELD]   || "").trim();
+      let line = city;
+      if (state) line += (line ? ", " : "") + state;
+      if (zip)   line += (line ? " "  : "") + zip;
+      return line;
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -568,9 +582,9 @@ border-left: 4px solid #1a3a5c;
           return;
         }
 
-        const intersectsFile = foundFiles.find(f => f.includes(TARGET_INTERSECTS));
-        const withinFile     = foundFiles.find(f => f.includes(TARGET_WITHIN));
-        const targetFile     = intersectsFile || withinFile || foundFiles[0];
+        // Look for Adjacent Parcels (Proximity) first, fall back to first CSV found
+        const adjacentFile = foundFiles.find(f => f.includes(TARGET_ADJACENT));
+        const targetFile   = adjacentFile || foundFiles[0];
 
         if (!targetFile) {
           errEl.textContent = "⚠️ Could not find the expected CSV file in the ZIP.";
@@ -617,7 +631,6 @@ border-left: 4px solid #1a3a5c;
 
     // ─────────────────────────────────────────────────────────────────
     // CONFIGURE SCREEN
-    // FIX 1: Show record count prominently; no filename; no files panel
     // ─────────────────────────────────────────────────────────────────
     function setupConfigureScreen() {
       // ── Deduplicate by PARCEL_ID + SLH_OWN_NAME ──
@@ -631,10 +644,8 @@ border-left: 4px solid #1a3a5c;
         const key  = id && name ? `${id}||${name}` : null;
 
         if (!key) {
-          // No key available — keep record
           deduped.push(r);
         } else if (seen.has(key)) {
-          // Duplicate — record the name if not already noted
           const cleanedName = cleanName(name);
           if (!dupeNames.includes(cleanedName)) dupeNames.push(cleanedName);
         } else {
@@ -643,7 +654,6 @@ border-left: 4px solid #1a3a5c;
         }
       });
 
-      // Replace csvRecords with deduped set
       csvRecords = deduped;
 
       document.getElementById("record-count-badge").textContent =
@@ -655,9 +665,8 @@ border-left: 4px solid #1a3a5c;
       const listEl    = document.getElementById("duplicate-list");
 
       if (dupeNames.length > 0) {
-        const removedCount = csvRecords.length;
         summaryEl.textContent =
-          `While performing the analysis, duplicate records were found and all duplicates were removed. ` +
+          `Duplicate records were found and removed. ` +
           `${csvRecords.length} labels will be generated.`;
         listEl.innerHTML = dupeNames.map(n =>
           `<li>Duplicate records found for <strong>${n}</strong> — all duplicates removed.</li>`
@@ -672,10 +681,16 @@ border-left: 4px solid #1a3a5c;
       const sample  = csvRecords[0] || {};
       const hasName = NAME_FIELD in sample;
       const hasAddr = ADDRESS_FIELD in sample;
+      const hasCity = CITY_FIELD in sample;
 
-      if (!hasName || !hasAddr) {
+      if (!hasName || !hasAddr || !hasCity) {
+        const missing = [
+          !hasName ? NAME_FIELD    : null,
+          !hasAddr ? ADDRESS_FIELD : null,
+          !hasCity ? CITY_FIELD    : null,
+        ].filter(Boolean);
         warnEl.textContent =
-          `⚠️ Expected fields not found. Looking for "${NAME_FIELD}" and "${ADDRESS_FIELD}". ` +
+          `⚠️ Expected fields not found: ${missing.join(", ")}. ` +
           `Found: ${Object.keys(sample).join(", ")}`;
         warnEl.style.display = "block";
       } else {
@@ -683,17 +698,14 @@ border-left: 4px solid #1a3a5c;
       }
 
       updatePreview();
-      document.getElementById("cityState").addEventListener("input", updatePreview);
     }
 
-    // FIX 3: cleanName applied in preview
     function updatePreview() {
-      const cityState = document.getElementById("cityState").value;
-      const sample    = csvRecords[0] || {};
+      const sample = csvRecords[0] || {};
 
-      document.getElementById("preview-name").textContent    = cleanName(sample[NAME_FIELD])    || "OWNER NAME";
-      document.getElementById("preview-address").textContent = sample[ADDRESS_FIELD] || "123 MAIN STREET";
-      document.getElementById("preview-city").textContent    = cityState || "Enfield, CT";
+      document.getElementById("preview-name").textContent        = cleanName(sample[NAME_FIELD])    || "OWNER NAME";
+      document.getElementById("preview-address").textContent     = (sample[ADDRESS_FIELD] || "").trim() || "123 MAIN STREET";
+      document.getElementById("preview-citystatezip").textContent = buildCityStateLine(sample) || "ENFIELD, CT 06082";
 
       const pages = Math.ceil(csvRecords.length / 30);
       document.getElementById("preview-meta").textContent =
@@ -704,7 +716,6 @@ border-left: 4px solid #1a3a5c;
     // GENERATE PDF
     // ─────────────────────────────────────────────────────────────────
     function handleGenerate() {
-      const cityState   = document.getElementById("cityState").value;
       const headerText  = document.getElementById("headerText").value;
       const showBorders = document.getElementById("showBorders").checked;
       const errEl       = document.getElementById("configure-error");
@@ -722,7 +733,7 @@ border-left: 4px solid #1a3a5c;
 
       setTimeout(() => {
         try {
-          generatePDF({ cityState, headerText, showBorders });
+          generatePDF({ headerText, showBorders });
           const pages = Math.ceil(csvRecords.length / 30);
           document.getElementById("done-meta").textContent =
             `${csvRecords.length} labels · ${pages} page(s) · Avery 5160 format`;
@@ -753,7 +764,6 @@ border-left: 4px solid #1a3a5c;
       const PADDING  = 0.1;
       const LINE_H   = 0.17;
 
-      // csvRecords already deduplicated in setupConfigureScreen
       const unique     = csvRecords;
       const totalPages = Math.ceil(unique.length / PER_PAGE);
 
@@ -790,57 +800,56 @@ border-left: 4px solid #1a3a5c;
 
       unique.forEach((record) => {
         try {
-        // FIX 3: cleanName strips leading/trailing "+"
-        const name    = cleanName(record[NAME_FIELD]    || "");
-        const address = (record[ADDRESS_FIELD] || "").trim();
-        if (!name && !address) return;
+          const name         = cleanName(record[NAME_FIELD]    || "");
+          const address      = (record[ADDRESS_FIELD] || "").trim();
+          const cityStateLine = buildCityStateLine(record);
 
-        const pageIndex = labelCount % PER_PAGE;
-        const col       = pageIndex % NUM_COLS;
-        const row       = Math.floor(pageIndex / NUM_COLS);
+          if (!name && !address) return;
 
-        if (labelCount > 0 && pageIndex === 0) {
-          drawFooter(labelCount);
-          doc.addPage();
-          pageNum++;
-          drawHeader(pageNum);
-        }
+          const pageIndex = labelCount % PER_PAGE;
+          const col       = pageIndex % NUM_COLS;
+          const row       = Math.floor(pageIndex / NUM_COLS);
 
-        const x = L_MARGIN + col * (LBL_W + COL_GAP);
-        const y = T_MARGIN + row * LBL_H;
+          if (labelCount > 0 && pageIndex === 0) {
+            drawFooter(labelCount);
+            doc.addPage();
+            pageNum++;
+            drawHeader(pageNum);
+          }
 
-        if (opts.showBorders) {
-          doc.setDrawColor(200, 200, 200);
-          doc.setLineWidth(0.005);
-          doc.rect(x, y, LBL_W, LBL_H);
-          doc.setDrawColor(0, 0, 0);
-        }
+          const x = L_MARGIN + col * (LBL_W + COL_GAP);
+          const y = T_MARGIN + row * LBL_H;
 
-        const tx   = x + PADDING;
-        const maxW = LBL_W - (PADDING * 2);
-        const ty   = y + 0.22;
+          if (opts.showBorders) {
+            doc.setDrawColor(200, 200, 200);
+            doc.setLineWidth(0.005);
+            doc.rect(x, y, LBL_W, LBL_H);
+            doc.setDrawColor(0, 0, 0);
+          }
 
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(10);
+          const tx   = x + PADDING;
+          const maxW = LBL_W - (PADDING * 2);
+          const ty   = y + 0.22;
 
-        // Guard: only split if name is non-empty
-        const nameLines  = name ? doc.splitTextToSize(name, maxW) : [];
-        const nameBlockH = nameLines.length > 0 ? nameLines.length * LINE_H : LINE_H;
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(10);
 
-        if (nameLines.length > 0) doc.text(nameLines, tx, ty);
+          const nameLines  = name ? doc.splitTextToSize(name, maxW) : [];
+          const nameBlockH = nameLines.length > 0 ? nameLines.length * LINE_H : LINE_H;
 
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(10);
-        if (address)        doc.text(address,        tx, ty + nameBlockH);
-        if (opts.cityState) doc.text(opts.cityState, tx, ty + nameBlockH + LINE_H);
+          if (nameLines.length > 0) doc.text(nameLines, tx, ty);
 
-        labelCount++;
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(10);
+          if (address)      doc.text(address,       tx, ty + nameBlockH);
+          if (cityStateLine) doc.text(cityStateLine, tx, ty + nameBlockH + LINE_H);
+
+          labelCount++;
         } catch(e) { console.warn("Skipped record due to error:", e); }
       });
 
       drawFooter(labelCount);
 
-      // FIX 4: Blob URL opened in new window — works in Chrome and all browsers
       const pdfBlob = doc.output("blob");
       const pdfUrl  = URL.createObjectURL(pdfBlob);
       window.open(pdfUrl, "_blank");
@@ -855,7 +864,6 @@ border-left: 4px solid #1a3a5c;
       currentFileName = "";
       document.getElementById("fileInput").value             = "";
       document.getElementById("upload-error").style.display  = "none";
-      document.getElementById("cityState").value    = "Enfield, CT";
       document.getElementById("headerText").value   = "Town of Enfield - Abutters Notification";
       document.getElementById("showBorders").checked = false;
       goToStep("upload");
